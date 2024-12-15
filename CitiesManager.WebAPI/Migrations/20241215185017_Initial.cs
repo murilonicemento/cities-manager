@@ -31,7 +31,7 @@ namespace CitiesManager.WebAPI.Migrations
                 values: new object[,]
                 {
                     { new Guid("1634ca72-4e8a-4151-bd97-3526909d62cb"), "New York" },
-                    { new Guid("ad49cf1f-ed27-4d38-a4f3-3ed3006e208a"), "Japan" }
+                    { new Guid("ad49cf1f-ed27-4d38-a4f3-3ed3006e208a"), "Tokyo" }
                 });
         }
 
