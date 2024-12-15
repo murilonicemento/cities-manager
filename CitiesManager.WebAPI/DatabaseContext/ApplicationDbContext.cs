@@ -23,7 +23,7 @@ public class ApplicationDbContext : DbContext
             new City
             {
                 Id = Guid.Parse("AD49CF1F-ED27-4D38-A4F3-3ED3006E208A"),
-                Name = "Japan"
+                Name = "Tokyo"
             }
         );
         modelBuilder.Entity<City>().HasData(
