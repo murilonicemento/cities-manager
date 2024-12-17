@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CitiesManager.WebAPI.DatabaseContext;
@@ -25,10 +20,7 @@ namespace CitiesManager.WebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<City>>> GetCities()
         {
-            if (_context.Cities == null)
-            {
-                return NotFound();
-            }
+            if (_context.Cities == null) return NotFound();
 
             return await _context.Cities.ToListAsync();
         }
@@ -37,17 +29,11 @@ namespace CitiesManager.WebAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<City>> GetCity(Guid id)
         {
-            if (_context.Cities == null)
-            {
-                return NotFound();
-            }
+            if (_context.Cities == null) return NotFound();
 
             var city = await _context.Cities.FindAsync(id);
 
-            if (city == null)
-            {
-                return NotFound();
-            }
+            if (city == null) return NotFound();
 
             return city;
         }
@@ -55,14 +41,17 @@ namespace CitiesManager.WebAPI.Controllers
         // PUT: api/Cities/5
         // To protect from over posting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCity(Guid id, City city)
+        public async Task<IActionResult> PutCity(Guid id, [Bind(nameof(City.Id), nameof(City.Name))] City city)
         {
-            if (id != city.Id)
-            {
-                return BadRequest();
-            }
+            if (id != city.Id) return BadRequest();
 
-            _context.Entry(city).State = EntityState.Modified;
+            var existingCity = await _context.Cities.FindAsync(id);
+
+            if (existingCity is null) return NotFound();
+
+            existingCity.Name = city.Name;
+
+            // _context.Entry(city).State = EntityState.Modified;
 
             try
             {
@@ -70,14 +59,9 @@ namespace CitiesManager.WebAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CityExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                if (!CityExists(id)) return NotFound();
+
+                throw;
             }
 
             return NoContent();
@@ -86,12 +70,9 @@ namespace CitiesManager.WebAPI.Controllers
         // POST: api/Cities
         // To protect from over posting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<City>> PostCity(City city)
+        public async Task<ActionResult<City>> PostCity([Bind(nameof(City.Id), nameof(City.Name))] City city)
         {
-            if (_context.Cities == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Cities'  is null.");
-            }
+            if (_context.Cities == null) return Problem("Entity set 'ApplicationDbContext.Cities'  is null.");
 
             _context.Cities.Add(city);
             await _context.SaveChangesAsync();
@@ -103,16 +84,11 @@ namespace CitiesManager.WebAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCity(Guid id)
         {
-            if (_context.Cities == null)
-            {
-                return NotFound();
-            }
+            if (_context.Cities == null) return NotFound();
 
             var city = await _context.Cities.FindAsync(id);
-            if (city == null)
-            {
-                return NotFound();
-            }
+
+            if (city == null) return NotFound();
 
             _context.Cities.Remove(city);
             await _context.SaveChangesAsync();
