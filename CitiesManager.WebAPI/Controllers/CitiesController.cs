@@ -43,7 +43,8 @@ namespace CitiesManager.WebAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCity(Guid id, [Bind(nameof(City.Id), nameof(City.Name))] City city)
         {
-            if (id != city.Id) return BadRequest();
+            // if (id != city.Id) return BadRequest();
+            if (id != city.Id) return Problem(detail: "Invalid city Id", statusCode: 400, title: "City Update");
 
             var existingCity = await _context.Cities.FindAsync(id);
 
