@@ -10,11 +10,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+// Swagger
+builder.Services.AddEndpointsApiExplorer(); // generates description for all endpoints
+builder.Services.AddSwaggerGen(); // generates OpenAPI specification
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseHsts();
 app.UseHttpsRedirection();
+app.UseSwagger(); // creates endpoint for swagger.json
+app.UseSwaggerUI(); // creates swagger UI for testing all web api endpoints / action methods
 app.UseAuthorization();
 app.MapControllers();
 
