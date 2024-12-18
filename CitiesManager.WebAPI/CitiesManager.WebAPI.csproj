@@ -7,6 +7,10 @@
       <UserSecretsId>b165be23-3dc4-46b7-b9c1-afec9fb2d507</UserSecretsId>
   </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>api.xml</DocumentationFile>
+    </PropertyGroup>
+
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.3" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.3" />
