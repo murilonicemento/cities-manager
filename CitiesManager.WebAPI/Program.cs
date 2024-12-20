@@ -12,7 +12,16 @@ builder.Services.AddControllers(options =>
     options.Filters.Add(new ConsumesAttribute("application/json"));
 }).AddXmlSerializerFormatters();
 
-builder.Services.AddApiVersioning(config => { config.ApiVersionReader = new UrlSegmentApiVersionReader(); });
+builder.Services.AddApiVersioning(config =>
+{
+    config.ApiVersionReader =
+        new UrlSegmentApiVersionReader(); // reads version number from request url at "apiVersion" constraint
+    // config.ApiVersionReader = new QueryStringApiVersionReader(); // reads version number from request query string called "api-version"
+    // config.ApiVersionReader = new HeaderApiVersionReader(); // reads version number from request header called "api-version"
+
+    config.DefaultApiVersion = new ApiVersion(1, 0);
+    config.AssumeDefaultVersionWhenUnspecified = true;
+});
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
