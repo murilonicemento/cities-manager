@@ -1,9 +1,11 @@
+using CitiesManager.WebAPI.Identity;
 using CitiesManager.WebAPI.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CitiesManager.WebAPI.DatabaseContext;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
     public virtual DbSet<City> Cities { get; set; }
 
