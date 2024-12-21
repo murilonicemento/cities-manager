@@ -89,6 +89,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseHsts();
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseSwagger(); // creates endpoint for swagger.json
 app.UseSwaggerUI(options =>
 {
