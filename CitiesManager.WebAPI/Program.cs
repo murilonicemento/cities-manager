@@ -24,6 +24,7 @@ builder.Services.AddApiVersioning(config =>
     config.AssumeDefaultVersionWhenUnspecified = true;
 });
 
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -38,11 +39,11 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v2", new OpenApiInfo { Title = "Cities Web API", Version = "2" });
 }); // generates OpenAPI specification
 
-// builder.Services.AddVersionedApiExplorer(options =>
-// {
-//     options.GroupNameFormat = "'v'VVV";
-//     options.SubstituteApiVersionInUrl = true;
-// });
+builder.Services.AddVersionedApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+});
 
 var app = builder.Build();
 
