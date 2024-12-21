@@ -32,6 +32,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer(); // generates description for all endpoints
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "api.xml"));
@@ -45,6 +46,14 @@ builder.Services.AddVersionedApiExplorer(options =>
     options.SubstituteApiVersionInUrl = true;
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? []);
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -56,6 +65,8 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "1");
     options.SwaggerEndpoint("/swagger/v2/swagger.json", "2");
 }); // creates swagger UI for testing all web api endpoints / action methods
+app.UseRouting();
+app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
 
