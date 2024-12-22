@@ -3,7 +3,6 @@ using CitiesManager.WebAPI.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Versioning;
 
 namespace CitiesManager.WebAPI.Controllers.v1;
 
@@ -26,7 +25,7 @@ public class AccountController : CustomControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApplicationUser>> Post(RegisterDTO registerDto)
+    public async Task<ActionResult<ApplicationUser>> Register(RegisterDTO registerDto)
     {
         if (!ModelState.IsValid)
         {
@@ -64,5 +63,37 @@ public class AccountController : CustomControllerBase
         var user = await _userManager.FindByEmailAsync(email);
 
         return Ok(user is null);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Login(LoginDTO loginDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errorMessage = string.Join(" | ", ModelState.Values.SelectMany(value => value.Errors)
+                .Select(error => error.ErrorMessage));
+
+            return Problem(errorMessage, statusCode: 400);
+        }
+
+        var result = await _signInManager.PasswordSignInAsync(userName: loginDto.Email, password: loginDto.Password,
+            isPersistent: false,
+            lockoutOnFailure: false);
+
+        if (!result.Succeeded) return Problem("Invalid email or password", statusCode: 400);
+
+        var user = await _userManager.FindByEmailAsync(loginDto.Email);
+
+        if (user is null) return NoContent();
+
+        return Ok(new { user.PersonName, user.Email });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Logout()
+    {
+        await _signInManager.SignOutAsync();
+
+        return NoContent();
     }
 }
