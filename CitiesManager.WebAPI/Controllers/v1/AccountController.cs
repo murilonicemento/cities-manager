@@ -1,5 +1,6 @@
 using CitiesManager.WebAPI.DTO;
 using CitiesManager.WebAPI.Identity;
+using CitiesManager.WebAPI.ServicesContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,13 +16,18 @@ public class AccountController : CustomControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
+    private readonly IJwtService _jwtService;
 
-    public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
-        RoleManager<ApplicationRole> roleManager)
+    public AccountController(
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        RoleManager<ApplicationRole> roleManager,
+        IJwtService jwtService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _roleManager = roleManager;
+        _jwtService = jwtService;
     }
 
     [HttpPost]
@@ -49,7 +55,9 @@ public class AccountController : CustomControllerBase
         {
             await _signInManager.SignInAsync(user, isPersistent: false);
 
-            return Ok(user);
+            var authenticationResponse = _jwtService.CreateJwt(user);
+
+            return Ok(authenticationResponse);
         }
 
         var errors = string.Join(" | ", result.Errors.Select(error => error.Description));
@@ -86,7 +94,9 @@ public class AccountController : CustomControllerBase
 
         if (user is null) return NoContent();
 
-        return Ok(new { user.PersonName, user.Email });
+        var authenticationResponse = _jwtService.CreateJwt(user);
+
+        return Ok(authenticationResponse);
     }
 
     [HttpGet]

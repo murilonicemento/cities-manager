@@ -1,5 +1,7 @@
 using CitiesManager.WebAPI.DatabaseContext;
 using CitiesManager.WebAPI.Identity;
+using CitiesManager.WebAPI.Services;
+using CitiesManager.WebAPI.ServicesContracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +17,8 @@ builder.Services.AddControllers(options =>
     options.Filters.Add(new ProducesAttribute("application/json"));
     options.Filters.Add(new ConsumesAttribute("application/json"));
 }).AddXmlSerializerFormatters();
+
+builder.Services.AddTransient<IJwtService, JwtService>();
 
 builder.Services.AddApiVersioning(config =>
 {
