@@ -28,7 +28,8 @@ public class JwtService : IJwtService
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)),
             new(ClaimTypes.NameIdentifier, user.Email ?? string.Empty),
-            new(ClaimTypes.Name, user.PersonName ?? string.Empty)
+            new(ClaimTypes.Name, user.PersonName ?? string.Empty),
+            new(ClaimTypes.Email, user.Email ?? string.Empty)
         ];
 
         SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? string.Empty));
@@ -54,6 +55,34 @@ public class JwtService : IJwtService
             RefreshTokenExpirationDate =
                 DateTime.Now.AddMinutes(Convert.ToInt32(_configuration["RefreshToken:EXPIRATION_DATE"]))
         };
+    }
+
+    public ClaimsPrincipal? GetPrincipalFromJwtToken(string? token)
+    {
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = true,
+            ValidAudience = _configuration["Jwt:Audience"],
+            ValidateIssuer = true,
+            ValidIssuer = _configuration["Jwt:Issuer"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey =
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? string.Empty)),
+            ValidateLifetime = false
+        };
+
+        var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+        var principal =
+            jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+
+        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                StringComparison.InvariantCultureIgnoreCase))
+        {
+            throw new SecurityTokenException("Invalid Token");
+        }
+
+        return principal;
     }
 
     private static string GenerateRefreshToken()

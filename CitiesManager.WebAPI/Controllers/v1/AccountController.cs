@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using CitiesManager.WebAPI.DTO;
 using CitiesManager.WebAPI.Identity;
 using CitiesManager.WebAPI.ServicesContracts;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -110,5 +112,30 @@ public class AccountController : CustomControllerBase
         await _signInManager.SignOutAsync();
 
         return NoContent();
+    }
+
+    [HttpPost("generate-new-jwt-token")]
+    public async Task<IActionResult> GenerateNewAccesToken(TokenModel? tokenModel)
+    {
+        if (tokenModel is null) return BadRequest("Invalid client request");
+
+        var principal = _jwtService.GetPrincipalFromJwtToken(tokenModel.Token);
+
+        if (principal is null) return BadRequest("Invalid jwt access token");
+
+        var email = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        var user = await _userManager.FindByEmailAsync(email);
+
+        if (user is null || user.RefreshToken != tokenModel.RefreshToken || user.RefreshTokenExpiration <= DateTime.Now)
+            return BadRequest("Invalid refresh token");
+
+        var authenticationResponse = _jwtService.CreateJwt(user);
+
+        user.RefreshToken = authenticationResponse.RefreshToken;
+        user.RefreshTokenExpiration = authenticationResponse.RefreshTokenExpirationDate;
+
+        await _userManager.UpdateAsync(user);
+
+        return Ok(authenticationResponse);
     }
 }
