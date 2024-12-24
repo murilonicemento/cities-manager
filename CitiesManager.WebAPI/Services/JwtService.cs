@@ -4,6 +4,7 @@ using CitiesManager.WebAPI.DTO;
 using CitiesManager.WebAPI.Identity;
 using CitiesManager.WebAPI.ServicesContracts;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
@@ -48,7 +49,20 @@ public class JwtService : IJwtService
             Token = token,
             Email = user.Email,
             PersonName = user.PersonName,
-            Expiration = expiration
+            Expiration = expiration,
+            RefreshToken = GenerateRefreshToken(),
+            RefreshTokenExpirationDate =
+                DateTime.Now.AddMinutes(Convert.ToInt32(_configuration["RefreshToken:EXPIRATION_DATE"]))
         };
+    }
+
+    private static string GenerateRefreshToken()
+    {
+        var bytes = new byte[64];
+        var randomNumberGenerator = RandomNumberGenerator.Create();
+
+        randomNumberGenerator.GetBytes(bytes);
+
+        return Convert.ToBase64String(bytes);
     }
 }
